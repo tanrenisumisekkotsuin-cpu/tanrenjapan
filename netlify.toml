@@ -1,0 +1,23 @@
+# Netlify 公開設定（TANREN JAPAN 公式案内ページ）
+# index.html / style.css / script.js をそのまま公開します。
+
+[build]
+  publish = "."
+  # 静的HTMLのためビルド処理は不要
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"
