@@ -7,109 +7,72 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Noto Sans JP', sans-serif;
-            background-color: #f8fafc;
-        }
-        .premium-input {
-            transition: all 0.3s ease;
-            background-color: #ffffff;
-        }
-        .premium-input:focus {
-            outline: none;
-            border-color: #002D5B;
-            box-shadow: 0 0 0 4px rgba(0, 45, 91, 0.1);
-        }
-        .choice-card {
-            transition: all 0.2s ease;
-        }
-        .choice-card:hover {
-            border-color: #002D5B;
-            background-color: #f1f5f9;
-        }
+        body { font-family: 'Noto Sans JP', sans-serif; background-color: #f8fafc; }
+        .premium-input { transition: all 0.3s ease; background-color: #ffffff; }
+        .premium-input:focus { outline: none; border-color: #002D5B; box-shadow: 0 0 0 4px rgba(0, 45, 91, 0.1); }
+        .choice-card { transition: all 0.2s ease; }
+        .choice-card:hover { border-color: #002D5B; background-color: #f1f5f9; }
     </style>
 </head>
 <body class="text-slate-800 min-h-screen flex items-center justify-center p-4 sm:p-8">
-
-    <div class="w-full max-w-xl bg-white rounded-2xl p-8 sm:p-10 shadow-2xl shadow-slate-200/80 border border-slate-100">
-        
+    <div class="w-full max-w-xl bg-white rounded-2xl p-8 sm:p-10 shadow-2xl border border-slate-100">
         <div class="text-center mb-10">
             <h1 class="text-4xl font-900 tracking-widest text-slate-900 mb-2">TANREN</h1>
             <p class="text-xs font-bold text-blue-800 uppercase tracking-widest">総合ご案内・相談窓口</p>
             <p class="text-xs text-slate-400 mt-3">ご興味のある項目を選択してください。1分で簡単にお答えいただけます。</p>
             <div class="h-[3px] w-12 bg-blue-900 mx-auto mt-4 rounded-full"></div>
         </div>
-
         <form id="tg-form" class="space-y-6">
-            
             <div>
-                <label class="block text-xs font-bold text-slate-700 mb-2 tracking-wider uppercase">お名前 <span class="text-red-500">*</span></label>
-                <input type="text" id="entry_name" required placeholder="例：特設 太郎" 
-                       class="premium-input w-full border border-slate-200 rounded-xl px-4 py-3.5 text-slate-900 placeholder-slate-400 font-medium">
+                <label class="block text-xs font-bold text-slate-700 mb-2 tracking-wider">お名前 <span class="text-red-500">*</span></label>
+                <input type="text" id="entry_name" required placeholder="例：特設 太郎" class="premium-input w-full border border-slate-200 rounded-xl px-4 py-3.5 text-slate-900 font-medium">
             </div>
-
             <div>
-                <label class="block text-xs font-bold text-slate-700 mb-2 tracking-wider uppercase">メールアドレス <span class="text-red-500">*</span></label>
-                <input type="email" id="entry_email" required placeholder="例：tanren@example.com" 
-                       class="premium-input w-full border border-slate-200 rounded-xl px-4 py-3.5 text-slate-900 placeholder-slate-400 font-medium">
+                <label class="block text-xs font-bold text-slate-700 mb-2 tracking-wider">メールアドレス <span class="text-red-500">*</span></label>
+                <input type="email" id="entry_email" required placeholder="例：tanren@example.com" class="premium-input w-full border border-slate-200 rounded-xl px-4 py-3.5 text-slate-900 font-medium">
             </div>
-
             <div>
-                <label class="block text-xs font-bold text-slate-700 mb-2 tracking-wider uppercase">一番ご興味のある項目を教えてください <span class="text-red-500">*</span></label>
-                
+                <label class="block text-xs font-bold text-slate-700 mb-2 tracking-wider">一番ご興味のある項目を教えてください <span class="text-red-500">*</span></label>
                 <div class="space-y-3 mt-3">
                     <label class="choice-card flex items-center p-4 border border-slate-200 rounded-xl cursor-pointer bg-white">
-                        <input type="radio" name="entry_interest" value="ジュニアキック・格闘技・ジム" required class="w-4 h-4 text-blue-900 focus:ring-blue-800 border-slate-300">
+                        <input type="radio" name="entry_interest" value="ジュニアキック・格闘技・ジム" required class="w-4 h-4 text-blue-900">
                         <span class="ml-3 font-bold text-slate-700 text-sm">🧒 ジュニアキック・格闘技・ジム</span>
                     </label>
-
                     <label class="choice-card flex items-center p-4 border border-slate-200 rounded-xl cursor-pointer bg-white">
-                        <input type="radio" name="entry_interest" value="身体のケア・接骨院の施術" class="w-4 h-4 text-blue-900 focus:ring-blue-800 border-slate-300">
+                        <input type="radio" name="entry_interest" value="身体のケア・接骨院の施術" class="w-4 h-4 text-blue-900">
                         <span class="ml-3 font-bold text-slate-700 text-sm">🦴 身体のケア・接骨院の施術</span>
                     </label>
-
                     <label class="choice-card flex items-center p-4 border border-slate-200 rounded-xl cursor-pointer bg-white">
-                        <input type="radio" name="entry_interest" value="空き家活用・地域イベント・キッチンカー" class="w-4 h-4 text-blue-900 focus:ring-blue-800 border-slate-300">
+                        <input type="radio" name="entry_interest" value="空き家活用・地域イベント・キッチンカー" class="w-4 h-4 text-blue-900">
                         <span class="ml-3 font-bold text-slate-700 text-sm">🏡 空き家活用・地域イベント・キッチンカー</span>
                     </label>
-
                     <label class="choice-card flex items-center p-4 border border-slate-200 rounded-xl cursor-pointer bg-white">
-                        <input type="radio" name="entry_interest" value="国際武道大学OB・学生のキャリア応援" class="w-4 h-4 text-blue-900 focus:ring-blue-800 border-slate-300">
+                        <input type="radio" name="entry_interest" value="国際武道大学OB・学生のキャリア応援" class="w-4 h-4 text-blue-900">
                         <span class="ml-3 font-bold text-slate-700 text-sm">🎓 国際武道大学OB・学生のキャリア応援</span>
                     </label>
-
                     <label class="choice-card flex items-center p-4 border border-slate-200 rounded-xl cursor-pointer bg-white">
-                        <input type="radio" name="entry_interest" value="その他・サポート相談" class="w-4 h-4 text-blue-900 focus:ring-blue-800 border-slate-300">
+                        <input type="radio" name="entry_interest" value="その他・サポート相談" class="w-4 h-4 text-blue-900">
                         <span class="ml-3 font-bold text-slate-700 text-sm">💬 その他・サポート相談</span>
                     </label>
                 </div>
             </div>
-
             <div class="pt-4">
-                <button type="submit" 
-                        class="w-full bg-blue-950 hover:bg-blue-900 text-white font-bold py-4 rounded-xl tracking-widest transition-all duration-300 transform hover:scale-[1.01] shadow-xl shadow-blue-950/10 active:scale-100 text-sm">
+                <button type="submit" class="w-full bg-blue-950 hover:bg-blue-900 text-white font-bold py-4 rounded-xl tracking-widest text-sm">
                     公式LINEに繋いで相談する
                 </button>
             </div>
         </form>
-
         <div id="success-message" class="hidden text-center py-12 space-y-4">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 text-blue-900 text-2xl font-bold mb-2 border border-slate-200">✓</div>
-            <h2 class="text-2xl font-bold text-slate-900 tracking-wider">LINEへ移動します</h2>
-            <p class="text-sm text-slate-500 leading-relaxed">画面が切り替わらない場合は、お手数ですがLINEアプリをご確認ください。</p>
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 text-blue-900 text-2xl font-bold mb-2">✓</div>
+            <h2 class="text-2xl font-bold text-slate-900">LINEへ移動します</h2>
+            <p class="text-sm text-slate-500">画面が切り替わらない場合は、お手数ですがLINEアプリをご確認ください。</p>
         </div>
-
     </div>
-
     <script>
         document.getElementById('tg-form').addEventListener('submit', function(e) {
             e.preventDefault();
-            
-            // 入力画面を隠して、完了画面を表示
             document.getElementById('tg-form').classList.add('hidden');
             document.getElementById('success-message').classList.remove('hidden');
-            
-            // 新しい正しいLINEのURLへ即時ジャンプ
             window.location.href = "https://lin.ee/z6ZWZ3U9";
         });
     </script>
