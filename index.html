@@ -110,9 +110,9 @@
             },
         };
         const LINE_URL = "https://lin.ee/UgfCpqq";
-        const MIN_SUBMIT_WAIT_MS = 2500;
-        const MAX_SUBMIT_WAIT_MS = 8000;
-        const LINE_REDIRECT_DELAY_MS = 600;
+        const MIN_SUBMIT_WAIT_MS = 3000;
+        const MAX_SUBMIT_WAIT_MS = 10000;
+        const LINE_REDIRECT_DELAY_MS = 800;
 
         const INTEREST_MAP = {
             "ジュニアキック・格闘技・ジム": { type: "other", value: "ジュニアキック・格闘技・ジム" },
@@ -125,55 +125,77 @@
             "その他・サポート相談": { type: "exact", value: "詳しく話を聞きたい" },
         };
 
-        function addHiddenField(form, name, value) {
-            const input = document.createElement("input");
-            input.type = "hidden";
-            input.name = name;
-            input.value = value;
-            form.appendChild(input);
-        }
+        function buildSubmissionParams(name, email, interest) {
+            const params = new URLSearchParams();
+            params.append(GOOGLE_FORM.entries.name, name);
+            params.append(GOOGLE_FORM.entries.contact, email);
+            params.append(GOOGLE_FORM.entries.contactOk, "連絡してもよい");
 
-        function appendInterestFields(form, interest) {
             const mapped = INTEREST_MAP[interest];
-            if (!mapped) return;
-            if (mapped.type === "exact") {
-                addHiddenField(form, GOOGLE_FORM.entries.interest, mapped.value);
-                return;
+            if (mapped) {
+                if (mapped.type === "exact") {
+                    params.append(GOOGLE_FORM.entries.interest, mapped.value);
+                } else {
+                    params.append(GOOGLE_FORM.entries.interest, "__other_option__");
+                    params.append(GOOGLE_FORM.entries.interest + ".other_option_response", mapped.value);
+                }
             }
-            addHiddenField(form, GOOGLE_FORM.entries.interest, "__other_option__");
-            addHiddenField(form, GOOGLE_FORM.entries.interest + ".other_option_response", mapped.value);
+            return params;
         }
 
-        function submitToGoogleForm(name, email, interest) {
+        function fillProxyForm(params) {
+            const proxy = document.getElementById("google-form-proxy");
+            proxy.action = GOOGLE_FORM.action;
+            proxy.innerHTML = "";
+            params.forEach(function (value, key) {
+                const input = document.createElement("input");
+                input.type = "hidden";
+                input.name = key;
+                input.value = value;
+                proxy.appendChild(input);
+            });
+            return proxy;
+        }
+
+        function postViaFetch(params) {
+            return fetch(GOOGLE_FORM.action, {
+                method: "POST",
+                mode: "no-cors",
+                credentials: "omit",
+                body: params,
+                keepalive: true,
+            }).catch(function () {});
+        }
+
+        function postViaIframe(params) {
             return new Promise(function (resolve) {
                 const iframe = document.getElementById("google-form-target");
-                const proxy = document.getElementById("google-form-proxy");
-                let finished = false;
-                const startedAt = Date.now();
+                const proxy = fillProxyForm(params);
+                let done = false;
+                let submitted = false;
 
                 function finish() {
-                    if (finished) return;
-                    finished = true;
-                    iframe.removeEventListener("load", onIframeLoad);
+                    if (done) return;
+                    done = true;
+                    iframe.onload = null;
                     resolve();
                 }
 
-                function onIframeLoad() {
-                    const elapsed = Date.now() - startedAt;
-                    const remain = Math.max(0, MIN_SUBMIT_WAIT_MS - elapsed);
-                    window.setTimeout(finish, remain);
-                }
+                iframe.onload = function () {
+                    if (!submitted) return;
+                    window.setTimeout(finish, MIN_SUBMIT_WAIT_MS);
+                };
 
-                iframe.addEventListener("load", onIframeLoad);
                 window.setTimeout(finish, MAX_SUBMIT_WAIT_MS);
-
-                proxy.action = GOOGLE_FORM.action;
-                proxy.innerHTML = "";
-                addHiddenField(proxy, GOOGLE_FORM.entries.name, name);
-                addHiddenField(proxy, GOOGLE_FORM.entries.contact, email);
-                addHiddenField(proxy, GOOGLE_FORM.entries.contactOk, "連絡してもよい");
-                appendInterestFields(proxy, interest);
+                submitted = true;
                 proxy.submit();
+            });
+        }
+
+        function submitToGoogleForm(name, email, interest) {
+            const params = buildSubmissionParams(name, email, interest);
+            return postViaFetch(params).then(function () {
+                return postViaIframe(new URLSearchParams(params.toString()));
             });
         }
 
