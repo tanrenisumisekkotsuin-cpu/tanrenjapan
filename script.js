@@ -6,7 +6,7 @@ const links = {
   kidsTrial: "https://forms.gle/Bf1s3pVYn6crX6wh7", // 子ども体験・見学フォーム（Googleフォーム回答用URL）
   propertyInfo: "https://forms.gle/gBuoN7ks5XfWYyxu5", // 空き家・古民家・土地情報募集フォーム（下部ブロック専用）
   clinic: "",
-  line: "https://lin.ee/XFiPwx0i",
+  line: "https://lin.ee/UgfCpqq",
   instagram: "",
 };
 

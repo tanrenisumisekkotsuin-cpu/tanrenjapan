@@ -22,6 +22,19 @@
             <p class="text-xs text-slate-400 mt-3">ご興味のある項目を選択してください。1分で簡単にお答えいただけます。</p>
             <div class="h-[3px] w-12 bg-blue-900 mx-auto mt-4 rounded-full"></div>
         </div>
+        <section class="mb-8 rounded-2xl border border-blue-100 bg-blue-50/70 p-5">
+            <p class="text-[11px] font-bold tracking-widest text-blue-900 mb-2">育成・OB・地域連携</p>
+            <h2 class="text-xl font-black text-slate-900 leading-snug mb-3">TANREN 育成・OB・地域連携プロジェクト</h2>
+            <p class="text-sm leading-7 text-slate-700">
+                TANRENでは、格闘技・野球・トレーニング・接骨院でのケアを通じて、子どもたちや若者の体力、礼儀、挨拶、継続力、責任感を育てています。また、国際武道大学OB・学生、地域企業、スポーツ経験者とのつながりを活かし、働く場・学ぶ場・挑戦する場を広げる取り組みも進めています。
+            </p>
+            <div class="mt-4 grid gap-2 text-xs leading-6 text-slate-700">
+                <div class="rounded-xl bg-white px-3 py-2">礼儀・挨拶・片付け・継続力の指導</div>
+                <div class="rounded-xl bg-white px-3 py-2">野球・格闘技・トレーニングを通じた体力づくり</div>
+                <div class="rounded-xl bg-white px-3 py-2">接骨院と連携した身体のケア</div>
+                <div class="rounded-xl bg-white px-3 py-2">国際武道大学OB・学生、地域企業、地域活動との連携</div>
+            </div>
+        </section>
         <form id="tg-form" class="space-y-6">
             <div>
                 <label class="block text-xs font-bold text-slate-700 mb-2 tracking-wider">お名前 <span class="text-red-500">*</span></label>
@@ -51,6 +64,10 @@
                         <span class="ml-3 font-bold text-slate-700 text-sm">🎓 国際武道大学OB・学生のキャリア応援</span>
                     </label>
                     <label class="choice-card flex items-center p-4 border border-slate-200 rounded-xl cursor-pointer bg-white">
+                        <input type="radio" name="entry_interest" value="育成・OB・地域連携プロジェクト" class="w-4 h-4 text-blue-900">
+                        <span class="ml-3 font-bold text-slate-700 text-sm">🌱 育成・OB・地域連携プロジェクト</span>
+                    </label>
+                    <label class="choice-card flex items-center p-4 border border-slate-200 rounded-xl cursor-pointer bg-white">
                         <input type="radio" name="entry_interest" value="国際武道大学OB協力" class="w-4 h-4 text-blue-900">
                         <span class="ml-3 font-bold text-slate-700 text-sm">🎓 国際武道大学OB協力</span>
                     </label>
@@ -68,12 +85,15 @@
                 <button type="submit" class="w-full bg-blue-950 hover:bg-blue-900 text-white font-bold py-4 rounded-xl tracking-widest text-sm">
                     公式LINEに繋いで相談する
                 </button>
+                <p class="mt-3 text-xs leading-6 text-slate-500">
+                    LINEでは、お名前・連絡先・立場（保護者／学生／OB／企業／地域の方など）・相談内容・希望する対応をお送りください。
+                </p>
             </div>
         </form>
         <div id="success-message" class="hidden text-center py-12 space-y-4">
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 text-blue-900 text-2xl font-bold mb-2">✓</div>
-            <h2 class="text-2xl font-bold text-slate-900">送信完了・LINEへ移動します</h2>
-            <p class="text-sm text-slate-500">回答を保存しました。画面が切り替わらない場合は、お手数ですがLINEアプリをご確認ください。</p>
+            <h2 class="text-2xl font-bold text-slate-900">回答を保存しました</h2>
+            <p class="text-sm text-slate-500">Googleフォームへの送信が完了しました。続けて公式LINEへ移動します。</p>
         </div>
     </div>
     <iframe name="google-form-target" id="google-form-target" style="position:absolute;left:-9999px;width:1px;height:1px;border:0" title="送信処理"></iframe>
@@ -88,7 +108,7 @@
                 contact: "entry.564025786",
             },
         };
-        const LINE_URL = "https://lin.ee/XFiPwx0i";
+        const LINE_URL = "https://lin.ee/UgfCpqq";
         const SUBMIT_TIMEOUT_MS = 5000;
         const LINE_REDIRECT_DELAY_MS = 400;
 
@@ -97,6 +117,7 @@
             "身体のケア・接骨院の施術": { type: "exact", value: "身体のケア・接骨院の施術" },
             "空き家活用・地域イベント・キッチンカー": { type: "other", value: "空き家活用・地域イベント・キッチンカー" },
             "国際武道大学OB・学生のキャリア応援": { type: "exact", value: "国際武道大学OB・学生のキャリア応援" },
+            "育成・OB・地域連携プロジェクト": { type: "other", value: "育成・OB・地域連携プロジェクト" },
             "国際武道大学OB協力": { type: "other", value: "国際武道大学OB協力" },
             "スポンサー協力": { type: "exact", value: "スポンサー・協賛" },
             "その他・サポート相談": { type: "exact", value: "詳しく話を聞きたい" },
@@ -169,21 +190,10 @@
             });
         }
 
-        function postViaFetch(params) {
-            return fetch(GOOGLE_FORM.action, {
-                method: "POST",
-                mode: "no-cors",
-                credentials: "omit",
-                body: params,
-                keepalive: true,
-            }).catch(function () {});
-        }
-
         function submitToGoogleForm(name, email, interest) {
             const params = buildSubmissionParams(name, email, interest);
-            return postViaFetch(params).then(function () {
-                return postViaIframe(params);
-            });
+            // Googleフォームへ直接POST（iframe方式が最も確実）
+            return postViaIframe(params);
         }
 
         function redirectToLine() {
