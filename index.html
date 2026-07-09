@@ -76,21 +76,21 @@
             <p class="text-sm text-slate-500">回答を保存しました。画面が切り替わらない場合は、お手数ですがLINEアプリをご確認ください。</p>
         </div>
     </div>
-    <iframe name="google-form-target" id="google-form-target" class="hidden" title="送信処理"></iframe>
+    <iframe name="google-form-target" id="google-form-target" style="position:absolute;left:-9999px;width:1px;height:1px;border:0" title="送信処理"></iframe>
     <script>
-        // 事前入力URL: https://docs.google.com/forms/d/e/1FAIpQLSdbOWAJ_W0Fxw0Rgt1eG8hfLX_RrUrFdRHQIomlhhH2hjF36Q/viewform?usp=pp_url
         const GOOGLE_FORM = {
             prefillUrl: "https://docs.google.com/forms/d/e/1FAIpQLSdbOWAJ_W0Fxw0Rgt1eG8hfLX_RrUrFdRHQIomlhhH2hjF36Q/viewform?usp=pp_url",
             action: "https://docs.google.com/forms/d/e/1FAIpQLSdbOWAJ_W0Fxw0Rgt1eG8hfLX_RrUrFdRHQIomlhhH2hjF36Q/formResponse",
             entries: {
-                interest: "entry.336106506",   // 関われそうな内容
-                contactOk: "entry.1349474423", // こちらから個別に連絡してもよろしいですか？
-                name: "entry.940001319",       // お名前
-                contact: "entry.564025786",    // 連絡先
+                interest: "entry.336106506",
+                contactOk: "entry.1349474423",
+                name: "entry.940001319",
+                contact: "entry.564025786",
             },
         };
         const LINE_URL = "https://lin.ee/XFiPwx0i";
-        const REDIRECT_DELAY_MS = 900;
+        const SUBMIT_TIMEOUT_MS = 5000;
+        const LINE_REDIRECT_DELAY_MS = 400;
 
         const INTEREST_MAP = {
             "ジュニアキック・格闘技・ジム": { type: "other", value: "ジュニアキック・格闘技・ジム" },
@@ -102,65 +102,94 @@
             "その他・サポート相談": { type: "exact", value: "詳しく話を聞きたい" },
         };
 
-        function appendInterest(formData, interest) {
-            const mapped = INTEREST_MAP[interest];
-            if (!mapped) return;
-            if (mapped.type === "exact") {
-                formData.append(GOOGLE_FORM.entries.interest, mapped.value);
-                return;
-            }
-            formData.append(GOOGLE_FORM.entries.interest, "__other_option__");
-            formData.append(GOOGLE_FORM.entries.interest + ".other_option_response", mapped.value);
-        }
-
-        function buildFormData(name, email, interest) {
-            const formData = new FormData();
-            formData.append(GOOGLE_FORM.entries.name, name);
-            formData.append(GOOGLE_FORM.entries.contact, email);
-            formData.append(GOOGLE_FORM.entries.contactOk, "連絡してもよい");
-            appendInterest(formData, interest);
-            return formData;
-        }
-
-        function submitToGoogleForm(name, email, interest) {
-            fetch(GOOGLE_FORM.action, {
-                method: "POST",
-                body: buildFormData(name, email, interest),
-                mode: "no-cors",
-                keepalive: true,
-            }).catch(function () {});
-
-            const proxy = document.createElement("form");
-            proxy.method = "POST";
-            proxy.action = GOOGLE_FORM.action;
-            proxy.target = "google-form-target";
-            proxy.style.display = "none";
-
-            function addField(name, value) {
-                const input = document.createElement("input");
-                input.type = "hidden";
-                input.name = name;
-                input.value = value;
-                proxy.appendChild(input);
-            }
-
-            addField(GOOGLE_FORM.entries.name, name);
-            addField(GOOGLE_FORM.entries.contact, email);
-            addField(GOOGLE_FORM.entries.contactOk, "連絡してもよい");
+        function buildSubmissionParams(name, email, interest) {
+            const params = new URLSearchParams();
+            params.append(GOOGLE_FORM.entries.name, name);
+            params.append(GOOGLE_FORM.entries.contact, email);
+            params.append(GOOGLE_FORM.entries.contactOk, "連絡してもよい");
 
             const mapped = INTEREST_MAP[interest];
             if (mapped) {
                 if (mapped.type === "exact") {
-                    addField(GOOGLE_FORM.entries.interest, mapped.value);
+                    params.append(GOOGLE_FORM.entries.interest, mapped.value);
                 } else {
-                    addField(GOOGLE_FORM.entries.interest, "__other_option__");
-                    addField(GOOGLE_FORM.entries.interest + ".other_option_response", mapped.value);
+                    params.append(GOOGLE_FORM.entries.interest, "__other_option__");
+                    params.append(GOOGLE_FORM.entries.interest + ".other_option_response", mapped.value);
                 }
             }
+            return params;
+        }
 
-            document.body.appendChild(proxy);
-            proxy.submit();
-            proxy.remove();
+        function postViaIframe(params) {
+            return new Promise(function (resolve) {
+                const iframe = document.getElementById("google-form-target");
+                let settled = false;
+
+                function finish() {
+                    if (settled) return;
+                    settled = true;
+                    iframe.removeEventListener("load", onLoad);
+                    resolve();
+                }
+
+                const timeoutId = window.setTimeout(finish, SUBMIT_TIMEOUT_MS);
+                let waitingForResponse = false;
+
+                function onLoad() {
+                    if (!waitingForResponse) return;
+                    window.clearTimeout(timeoutId);
+                    finish();
+                }
+
+                iframe.addEventListener("load", onLoad);
+
+                const oldProxy = document.getElementById("google-form-proxy");
+                if (oldProxy) oldProxy.remove();
+
+                const proxy = document.createElement("form");
+                proxy.id = "google-form-proxy";
+                proxy.method = "POST";
+                proxy.action = GOOGLE_FORM.action;
+                proxy.target = "google-form-target";
+                proxy.acceptCharset = "UTF-8";
+                proxy.style.position = "absolute";
+                proxy.style.left = "-9999px";
+
+                params.forEach(function (value, key) {
+                    const input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = key;
+                    input.value = value;
+                    proxy.appendChild(input);
+                });
+
+                document.body.appendChild(proxy);
+                waitingForResponse = true;
+                proxy.submit();
+            });
+        }
+
+        function postViaFetch(params) {
+            return fetch(GOOGLE_FORM.action, {
+                method: "POST",
+                mode: "no-cors",
+                credentials: "omit",
+                body: params,
+                keepalive: true,
+            }).catch(function () {});
+        }
+
+        function submitToGoogleForm(name, email, interest) {
+            const params = buildSubmissionParams(name, email, interest);
+            return postViaFetch(params).then(function () {
+                return postViaIframe(params);
+            });
+        }
+
+        function redirectToLine() {
+            window.setTimeout(function () {
+                window.location.href = LINE_URL;
+            }, LINE_REDIRECT_DELAY_MS);
         }
 
         document.getElementById("tg-form").addEventListener("submit", function (e) {
@@ -177,14 +206,19 @@
             const selectedInterest = document.querySelector('input[name="entry_interest"]:checked');
             const interest = selectedInterest ? selectedInterest.value : "";
 
-            submitToGoogleForm(name, email, interest);
-
-            document.getElementById("tg-form").classList.add("hidden");
-            document.getElementById("success-message").classList.remove("hidden");
-
-            window.setTimeout(function () {
-                window.location.href = LINE_URL;
-            }, REDIRECT_DELAY_MS);
+            submitToGoogleForm(name, email, interest)
+                .then(function () {
+                    document.getElementById("tg-form").classList.add("hidden");
+                    document.getElementById("success-message").classList.remove("hidden");
+                    redirectToLine();
+                })
+                .catch(function () {
+                    if (submitButton) {
+                        submitButton.disabled = false;
+                        submitButton.textContent = "公式LINEに繋いで相談する";
+                    }
+                    alert("送信に失敗しました。もう一度お試しください。");
+                });
         });
     </script>
 </body>
