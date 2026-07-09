@@ -48,36 +48,28 @@
                 <label class="block text-xs font-bold text-slate-700 mb-2 tracking-wider">一番ご興味のある項目を教えてください <span class="text-red-500">*</span></label>
                 <div class="space-y-3 mt-3">
                     <label class="choice-card flex items-center p-4 border border-slate-200 rounded-xl cursor-pointer bg-white">
-                        <input type="radio" name="entry_interest" value="ジュニアキック・格闘技・ジム" required class="w-4 h-4 text-blue-900">
-                        <span class="ml-3 font-bold text-slate-700 text-sm">🧒 ジュニアキック・格闘技・ジム</span>
+                        <input type="radio" name="entry_interest" value="身体のケア・接骨院の相談" required class="w-4 h-4 text-blue-900">
+                        <span class="ml-3 font-bold text-slate-700 text-sm">身体のケア・接骨院の相談</span>
                     </label>
                     <label class="choice-card flex items-center p-4 border border-slate-200 rounded-xl cursor-pointer bg-white">
-                        <input type="radio" name="entry_interest" value="身体のケア・接骨院の施術" class="w-4 h-4 text-blue-900">
-                        <span class="ml-3 font-bold text-slate-700 text-sm">🦴 身体のケア・接骨院の施術</span>
+                        <input type="radio" name="entry_interest" value="ジュニアキック・ジムの相談" class="w-4 h-4 text-blue-900">
+                        <span class="ml-3 font-bold text-slate-700 text-sm">ジュニアキック・ジムの相談</span>
                     </label>
                     <label class="choice-card flex items-center p-4 border border-slate-200 rounded-xl cursor-pointer bg-white">
-                        <input type="radio" name="entry_interest" value="空き家活用・地域イベント・キッチンカー" class="w-4 h-4 text-blue-900">
-                        <span class="ml-3 font-bold text-slate-700 text-sm">🏡 空き家活用・地域イベント・キッチンカー</span>
+                        <input type="radio" name="entry_interest" value="地域活動・空き家活用・イベント相談" class="w-4 h-4 text-blue-900">
+                        <span class="ml-3 font-bold text-slate-700 text-sm">地域活動・空き家活用・イベント相談</span>
                     </label>
                     <label class="choice-card flex items-center p-4 border border-slate-200 rounded-xl cursor-pointer bg-white">
-                        <input type="radio" name="entry_interest" value="国際武道大学OB・学生のキャリア応援" class="w-4 h-4 text-blue-900">
-                        <span class="ml-3 font-bold text-slate-700 text-sm">🎓 国際武道大学OB・学生のキャリア応援</span>
+                        <input type="radio" name="entry_interest" value="国際武道大学OB・学生サポート" class="w-4 h-4 text-blue-900">
+                        <span class="ml-3 font-bold text-slate-700 text-sm">国際武道大学OB・学生サポート</span>
                     </label>
                     <label class="choice-card flex items-center p-4 border border-slate-200 rounded-xl cursor-pointer bg-white">
-                        <input type="radio" name="entry_interest" value="育成・OB・地域連携プロジェクト" class="w-4 h-4 text-blue-900">
-                        <span class="ml-3 font-bold text-slate-700 text-sm">🌱 育成・OB・地域連携プロジェクト</span>
+                        <input type="radio" name="entry_interest" value="スポンサー・協賛・紹介の相談" class="w-4 h-4 text-blue-900">
+                        <span class="ml-3 font-bold text-slate-700 text-sm">スポンサー・協賛・紹介の相談</span>
                     </label>
                     <label class="choice-card flex items-center p-4 border border-slate-200 rounded-xl cursor-pointer bg-white">
-                        <input type="radio" name="entry_interest" value="国際武道大学OB協力" class="w-4 h-4 text-blue-900">
-                        <span class="ml-3 font-bold text-slate-700 text-sm">🎓 国際武道大学OB協力</span>
-                    </label>
-                    <label class="choice-card flex items-center p-4 border border-slate-200 rounded-xl cursor-pointer bg-white">
-                        <input type="radio" name="entry_interest" value="スポンサー協力" class="w-4 h-4 text-blue-900">
-                        <span class="ml-3 font-bold text-slate-700 text-sm">🤝 スポンサー協力</span>
-                    </label>
-                    <label class="choice-card flex items-center p-4 border border-slate-200 rounded-xl cursor-pointer bg-white">
-                        <input type="radio" name="entry_interest" value="その他・サポート相談" class="w-4 h-4 text-blue-900">
-                        <span class="ml-3 font-bold text-slate-700 text-sm">💬 その他・サポート相談</span>
+                        <input type="radio" name="entry_interest" value="その他・まずは相談したい" class="w-4 h-4 text-blue-900">
+                        <span class="ml-3 font-bold text-slate-700 text-sm">その他・まずは相談したい</span>
                     </label>
                 </div>
             </div>
@@ -114,31 +106,14 @@
         const MAX_SUBMIT_WAIT_MS = 10000;
         const LINE_REDIRECT_DELAY_MS = 800;
 
-        const INTEREST_MAP = {
-            "ジュニアキック・格闘技・ジム": { type: "other", value: "ジュニアキック・格闘技・ジム" },
-            "身体のケア・接骨院の施術": { type: "exact", value: "身体のケア・接骨院の施術" },
-            "空き家活用・地域イベント・キッチンカー": { type: "other", value: "空き家活用・地域イベント・キッチンカー" },
-            "国際武道大学OB・学生のキャリア応援": { type: "exact", value: "国際武道大学OB・学生のキャリア応援" },
-            "育成・OB・地域連携プロジェクト": { type: "other", value: "育成・OB・地域連携プロジェクト" },
-            "国際武道大学OB協力": { type: "other", value: "国際武道大学OB協力" },
-            "スポンサー協力": { type: "exact", value: "スポンサー・協賛" },
-            "その他・サポート相談": { type: "exact", value: "詳しく話を聞きたい" },
-        };
-
         function buildSubmissionParams(name, email, interest) {
             const params = new URLSearchParams();
             params.append(GOOGLE_FORM.entries.name, name);
             params.append(GOOGLE_FORM.entries.contact, email);
             params.append(GOOGLE_FORM.entries.contactOk, "連絡してもよい");
 
-            const mapped = INTEREST_MAP[interest];
-            if (mapped) {
-                if (mapped.type === "exact") {
-                    params.append(GOOGLE_FORM.entries.interest, mapped.value);
-                } else {
-                    params.append(GOOGLE_FORM.entries.interest, "__other_option__");
-                    params.append(GOOGLE_FORM.entries.interest + ".other_option_response", mapped.value);
-                }
+            if (interest) {
+                params.append(GOOGLE_FORM.entries.interest, interest);
             }
             return params;
         }
