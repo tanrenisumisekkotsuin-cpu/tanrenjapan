@@ -51,6 +51,14 @@
                         <span class="ml-3 font-bold text-slate-700 text-sm">🎓 国際武道大学OB・学生のキャリア応援</span>
                     </label>
                     <label class="choice-card flex items-center p-4 border border-slate-200 rounded-xl cursor-pointer bg-white">
+                        <input type="radio" name="entry_interest" value="国際武道大学OB協力" class="w-4 h-4 text-blue-900">
+                        <span class="ml-3 font-bold text-slate-700 text-sm">🎓 国際武道大学OB協力</span>
+                    </label>
+                    <label class="choice-card flex items-center p-4 border border-slate-200 rounded-xl cursor-pointer bg-white">
+                        <input type="radio" name="entry_interest" value="スポンサー協力" class="w-4 h-4 text-blue-900">
+                        <span class="ml-3 font-bold text-slate-700 text-sm">🤝 スポンサー協力</span>
+                    </label>
+                    <label class="choice-card flex items-center p-4 border border-slate-200 rounded-xl cursor-pointer bg-white">
                         <input type="radio" name="entry_interest" value="その他・サポート相談" class="w-4 h-4 text-blue-900">
                         <span class="ml-3 font-bold text-slate-700 text-sm">💬 その他・サポート相談</span>
                     </label>
@@ -64,16 +72,119 @@
         </form>
         <div id="success-message" class="hidden text-center py-12 space-y-4">
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 text-blue-900 text-2xl font-bold mb-2">✓</div>
-            <h2 class="text-2xl font-bold text-slate-900">LINEへ移動します</h2>
-            <p class="text-sm text-slate-500">画面が切り替わらない場合は、お手数ですがLINEアプリをご確認ください。</p>
+            <h2 class="text-2xl font-bold text-slate-900">送信完了・LINEへ移動します</h2>
+            <p class="text-sm text-slate-500">回答を保存しました。画面が切り替わらない場合は、お手数ですがLINEアプリをご確認ください。</p>
         </div>
     </div>
+    <iframe name="google-form-target" id="google-form-target" class="hidden" title="送信処理"></iframe>
     <script>
-        document.getElementById('tg-form').addEventListener('submit', function(e) {
+        // 事前入力URL: https://docs.google.com/forms/d/e/1FAIpQLSdbOWAJ_W0Fxw0Rgt1eG8hfLX_RrUrFdRHQIomlhhH2hjF36Q/viewform?usp=pp_url
+        const GOOGLE_FORM = {
+            prefillUrl: "https://docs.google.com/forms/d/e/1FAIpQLSdbOWAJ_W0Fxw0Rgt1eG8hfLX_RrUrFdRHQIomlhhH2hjF36Q/viewform?usp=pp_url",
+            action: "https://docs.google.com/forms/d/e/1FAIpQLSdbOWAJ_W0Fxw0Rgt1eG8hfLX_RrUrFdRHQIomlhhH2hjF36Q/formResponse",
+            entries: {
+                interest: "entry.336106506",   // 関われそうな内容
+                contactOk: "entry.1349474423", // こちらから個別に連絡してもよろしいですか？
+                name: "entry.940001319",       // お名前
+                contact: "entry.564025786",    // 連絡先
+            },
+        };
+        const LINE_URL = "https://lin.ee/XFiPwx0i";
+        const REDIRECT_DELAY_MS = 900;
+
+        const INTEREST_MAP = {
+            "ジュニアキック・格闘技・ジム": { type: "other", value: "ジュニアキック・格闘技・ジム" },
+            "身体のケア・接骨院の施術": { type: "exact", value: "身体のケア・接骨院の施術" },
+            "空き家活用・地域イベント・キッチンカー": { type: "other", value: "空き家活用・地域イベント・キッチンカー" },
+            "国際武道大学OB・学生のキャリア応援": { type: "exact", value: "国際武道大学OB・学生のキャリア応援" },
+            "国際武道大学OB協力": { type: "other", value: "国際武道大学OB協力" },
+            "スポンサー協力": { type: "exact", value: "スポンサー・協賛" },
+            "その他・サポート相談": { type: "exact", value: "詳しく話を聞きたい" },
+        };
+
+        function appendInterest(formData, interest) {
+            const mapped = INTEREST_MAP[interest];
+            if (!mapped) return;
+            if (mapped.type === "exact") {
+                formData.append(GOOGLE_FORM.entries.interest, mapped.value);
+                return;
+            }
+            formData.append(GOOGLE_FORM.entries.interest, "__other_option__");
+            formData.append(GOOGLE_FORM.entries.interest + ".other_option_response", mapped.value);
+        }
+
+        function buildFormData(name, email, interest) {
+            const formData = new FormData();
+            formData.append(GOOGLE_FORM.entries.name, name);
+            formData.append(GOOGLE_FORM.entries.contact, email);
+            formData.append(GOOGLE_FORM.entries.contactOk, "連絡してもよい");
+            appendInterest(formData, interest);
+            return formData;
+        }
+
+        function submitToGoogleForm(name, email, interest) {
+            fetch(GOOGLE_FORM.action, {
+                method: "POST",
+                body: buildFormData(name, email, interest),
+                mode: "no-cors",
+                keepalive: true,
+            }).catch(function () {});
+
+            const proxy = document.createElement("form");
+            proxy.method = "POST";
+            proxy.action = GOOGLE_FORM.action;
+            proxy.target = "google-form-target";
+            proxy.style.display = "none";
+
+            function addField(name, value) {
+                const input = document.createElement("input");
+                input.type = "hidden";
+                input.name = name;
+                input.value = value;
+                proxy.appendChild(input);
+            }
+
+            addField(GOOGLE_FORM.entries.name, name);
+            addField(GOOGLE_FORM.entries.contact, email);
+            addField(GOOGLE_FORM.entries.contactOk, "連絡してもよい");
+
+            const mapped = INTEREST_MAP[interest];
+            if (mapped) {
+                if (mapped.type === "exact") {
+                    addField(GOOGLE_FORM.entries.interest, mapped.value);
+                } else {
+                    addField(GOOGLE_FORM.entries.interest, "__other_option__");
+                    addField(GOOGLE_FORM.entries.interest + ".other_option_response", mapped.value);
+                }
+            }
+
+            document.body.appendChild(proxy);
+            proxy.submit();
+            proxy.remove();
+        }
+
+        document.getElementById("tg-form").addEventListener("submit", function (e) {
             e.preventDefault();
-            document.getElementById('tg-form').classList.add('hidden');
-            document.getElementById('success-message').classList.remove('hidden');
-            window.location.href = "https://lin.ee/XFiPwx0i";
+
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.textContent = "送信中...";
+            }
+
+            const name = document.getElementById("entry_name").value.trim();
+            const email = document.getElementById("entry_email").value.trim();
+            const selectedInterest = document.querySelector('input[name="entry_interest"]:checked');
+            const interest = selectedInterest ? selectedInterest.value : "";
+
+            submitToGoogleForm(name, email, interest);
+
+            document.getElementById("tg-form").classList.add("hidden");
+            document.getElementById("success-message").classList.remove("hidden");
+
+            window.setTimeout(function () {
+                window.location.href = LINE_URL;
+            }, REDIRECT_DELAY_MS);
         });
     </script>
 </body>
