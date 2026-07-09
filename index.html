@@ -64,8 +64,9 @@
         </div>
     </div>
     <iframe name="google-form-target" id="google-form-target" style="position:absolute;left:-9999px;width:1px;height:1px;border:0" title="送信処理"></iframe>
-    <form id="google-form-proxy" method="POST" action="https://docs.google.com/forms/d/e/1FAIpQLSdbOWAJ_W0Fxw0Rgt1eG8hfLX_RrUrFdRHQIomlhhH2hjF36Q/formResponse" target="google-form-target" accept-charset="UTF-8" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden" aria-hidden="true"></form>
+    <form id="google-form-proxy" method="POST" action="" target="google-form-target" accept-charset="UTF-8" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden" aria-hidden="true"></form>
     <script>
+        const FORM_ID = "1FAIpQLSdbOWAJ_W0Fxw0Rgt1eG8hfLX_RrUrFdRHQIomlhhH2hjF36Q";
         const CONSULT_OPTIONS = [
             "国際武道大学OB・学生のキャリア応援",
             "身体のケア・接骨院の施術",
@@ -74,6 +75,18 @@
             "スポンサー・協賛・紹介の相談",
             "その他・まずは相談したい",
         ];
+        const GOOGLE_FORM = {
+            prefillUrl: "https://docs.google.com/forms/d/e/" + FORM_ID + "/viewform?usp=pp_url",
+            action: "https://docs.google.com/forms/d/e/" + FORM_ID + "/formResponse",
+            entries: {
+                interest: "entry.336106506",
+                contactOk: "entry.1349474423",
+                name: "entry.940001319",
+                contact: "entry.564025786",
+            },
+            contactOkValue: "連絡してもよい",
+        };
+        const LINE_URL = "https://lin.ee/UgfCpqq";
 
         function renderConsultOptions() {
             const container = document.getElementById("consult-options");
@@ -100,17 +113,8 @@
 
         renderConsultOptions();
 
-        const GOOGLE_FORM = {
-            prefillUrl: "https://docs.google.com/forms/d/e/1FAIpQLSdbOWAJ_W0Fxw0Rgt1eG8hfLX_RrUrFdRHQIomlhhH2hjF36Q/viewform?usp=pp_url",
-            action: "https://docs.google.com/forms/d/e/1FAIpQLSdbOWAJ_W0Fxw0Rgt1eG8hfLX_RrUrFdRHQIomlhhH2hjF36Q/formResponse",
-            entries: {
-                interest: "entry.336106506",
-                contactOk: "entry.1349474423",
-                name: "entry.940001319",
-                contact: "entry.564025786",
-            },
-        };
-        const LINE_URL = "https://lin.ee/UgfCpqq";
+        document.getElementById("google-form-proxy").action = GOOGLE_FORM.action;
+
         const MIN_SUBMIT_WAIT_MS = 3000;
         const MAX_SUBMIT_WAIT_MS = 10000;
         const LINE_REDIRECT_DELAY_MS = 800;
@@ -119,9 +123,9 @@
             const params = new URLSearchParams();
             params.append(GOOGLE_FORM.entries.name, name);
             params.append(GOOGLE_FORM.entries.contact, email);
-            params.append(GOOGLE_FORM.entries.contactOk, "連絡してもよい");
+            params.append(GOOGLE_FORM.entries.contactOk, GOOGLE_FORM.contactOkValue);
 
-            if (interest) {
+            if (interest && CONSULT_OPTIONS.indexOf(interest) !== -1) {
                 params.append(GOOGLE_FORM.entries.interest, interest);
             }
             return params;
