@@ -59,14 +59,16 @@
         </form>
         <div id="success-message" class="hidden text-center py-12 space-y-4">
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 text-blue-900 text-2xl font-bold mb-2">✓</div>
-            <h2 class="text-2xl font-bold text-slate-900">回答を保存しました</h2>
-            <p class="text-sm text-slate-500">Googleフォームへの送信が完了しました。続けて公式LINEへ移動します。</p>
+            <h2 class="text-2xl font-bold text-slate-900">Googleフォームへ送信しました</h2>
+            <p id="success-detail" class="text-sm text-slate-500"></p>
         </div>
     </div>
     <iframe name="google-form-target" id="google-form-target" style="position:absolute;left:-9999px;width:1px;height:1px;border:0" title="送信処理"></iframe>
     <form id="google-form-proxy" method="POST" action="" target="google-form-target" accept-charset="UTF-8" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden" aria-hidden="true"></form>
     <script>
         const FORM_ID = "1FAIpQLSdbOWAJ_W0Fxw0Rgt1eG8hfLX_RrUrFdRHQIomlhhH2hjF36Q";
+        const FORM_TITLE = "TANREN活動サポート相談フォーム";
+        const ENABLE_LINE_REDIRECT = false;
         const CONSULT_OPTIONS = [
             "国際武道大学OB・学生のキャリア応援",
             "身体のケア・接骨院の施術",
@@ -115,25 +117,25 @@
 
         document.getElementById("google-form-proxy").action = GOOGLE_FORM.action;
 
-        const MIN_SUBMIT_WAIT_MS = 3000;
-        const MAX_SUBMIT_WAIT_MS = 10000;
-        const LINE_REDIRECT_DELAY_MS = 800;
+        const MIN_SUBMIT_WAIT_MS = 2000;
+        const MAX_SUBMIT_WAIT_MS = 8000;
 
         function buildSubmissionParams(name, email, interest) {
             const params = new URLSearchParams();
+            params.append("fvv", "1");
+            params.append("pageHistory", "0");
+            params.append(GOOGLE_FORM.entries.interest, interest);
+            params.append(GOOGLE_FORM.entries.contactOk, GOOGLE_FORM.contactOkValue);
             params.append(GOOGLE_FORM.entries.name, name);
             params.append(GOOGLE_FORM.entries.contact, email);
-            params.append(GOOGLE_FORM.entries.contactOk, GOOGLE_FORM.contactOkValue);
-
-            if (interest && CONSULT_OPTIONS.indexOf(interest) !== -1) {
-                params.append(GOOGLE_FORM.entries.interest, interest);
-            }
             return params;
         }
 
         function fillProxyForm(params) {
             const proxy = document.getElementById("google-form-proxy");
-            proxy.action = GOOGLE_FORM.action;
+            proxy.setAttribute("action", GOOGLE_FORM.action);
+            proxy.setAttribute("method", "POST");
+            proxy.setAttribute("accept-charset", "UTF-8");
             proxy.innerHTML = "";
             params.forEach(function (value, key) {
                 const input = document.createElement("input");
@@ -145,52 +147,51 @@
             return proxy;
         }
 
-        function postViaFetch(params) {
-            return fetch(GOOGLE_FORM.action, {
-                method: "POST",
-                mode: "no-cors",
-                credentials: "omit",
-                body: params,
-                keepalive: true,
-            }).catch(function () {});
-        }
+        function submitToGoogleForm(name, email, interest) {
+            const params = buildSubmissionParams(name, email, interest);
+            const proxy = fillProxyForm(params);
 
-        function postViaIframe(params) {
-            return new Promise(function (resolve) {
+            return new Promise(function (resolve, reject) {
                 const iframe = document.getElementById("google-form-target");
-                const proxy = fillProxyForm(params);
-                let done = false;
-                let submitted = false;
+                let settled = false;
 
-                function finish() {
-                    if (done) return;
-                    done = true;
+                function settle(success) {
+                    if (settled) return;
+                    settled = true;
                     iframe.onload = null;
-                    resolve();
+                    if (success) {
+                        resolve();
+                    } else {
+                        reject(new Error("Google Form submit failed"));
+                    }
                 }
 
                 iframe.onload = function () {
-                    if (!submitted) return;
-                    window.setTimeout(finish, MIN_SUBMIT_WAIT_MS);
+                    window.setTimeout(function () {
+                        settle(true);
+                    }, MIN_SUBMIT_WAIT_MS);
                 };
 
-                window.setTimeout(finish, MAX_SUBMIT_WAIT_MS);
-                submitted = true;
+                window.setTimeout(function () {
+                    settle(true);
+                }, MAX_SUBMIT_WAIT_MS);
+
                 proxy.submit();
             });
         }
 
-        function submitToGoogleForm(name, email, interest) {
-            const params = buildSubmissionParams(name, email, interest);
-            return postViaFetch(params).then(function () {
-                return postViaIframe(new URLSearchParams(params.toString()));
-            });
+        function showSubmitSuccess(interest) {
+            document.getElementById("tg-form").classList.add("hidden");
+            document.getElementById("success-message").classList.remove("hidden");
+            document.getElementById("success-detail").textContent =
+                FORM_TITLE + " へ送信しました。選択項目: " + interest;
         }
 
         function redirectToLine() {
+            if (!ENABLE_LINE_REDIRECT) return;
             window.setTimeout(function () {
                 window.location.href = LINE_URL;
-            }, LINE_REDIRECT_DELAY_MS);
+            }, 800);
         }
 
         document.getElementById("tg-form").addEventListener("submit", function (e) {
@@ -221,8 +222,7 @@
                     if (submitButton) {
                         submitButton.textContent = "送信完了";
                     }
-                    document.getElementById("tg-form").classList.add("hidden");
-                    document.getElementById("success-message").classList.remove("hidden");
+                    showSubmitSuccess(interest);
                     redirectToLine();
                 })
                 .catch(function () {
